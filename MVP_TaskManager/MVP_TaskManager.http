@@ -1,0 +1,6 @@
+@MVP_TaskManager_HostAddress = http://localhost:5005
+
+GET {{MVP_TaskManager_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
