@@ -1,8 +1,8 @@
-﻿namespace MVP_TaskManager.Models
+﻿namespace MVP_TaskManager.DTO
 {
     public class UserDTO
     {
-        //public int Id { get; set; }
+       
         public string Username { get; set; } = null!;
 
         public string Login { get; set; } = null!;

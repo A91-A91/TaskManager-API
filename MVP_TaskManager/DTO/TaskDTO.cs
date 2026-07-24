@@ -1,4 +1,4 @@
-﻿namespace MVP_TaskManager.Models
+﻿namespace MVP_TaskManager.DTO
 {
     public class TaskDTO
     {

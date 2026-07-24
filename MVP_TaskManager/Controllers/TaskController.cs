@@ -1,7 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System.Security.Claims;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MVP_TaskManager.Classes;
-using MVP_TaskManager.Models;
+using MVP_TaskManager.DTO;
+
 //using MVP_TaskManager.Models ;
 
 namespace MVP_TaskManager.Controllers
@@ -11,43 +14,61 @@ namespace MVP_TaskManager.Controllers
     public class TasksController : ControllerBase
     {
         
-        private readonly Operations operations;
+        private readonly Operations_tasks operations;
 
-        public TasksController(Operations _operations) 
+        public TasksController(Operations_tasks _operations) 
         {
             operations = _operations;
         }
 
-        [HttpGet("{id_user}")] //поиск и вывод задач у определенного пользователя
-        public async Task<ActionResult <List<Models.Task>>> GetAllTaskByUser(int id_user)
+        [Authorize]
+        [HttpGet] //поиск и вывод задач у определенного пользователя
+        public async Task<ActionResult <List<Models.Task>>> GetAllTaskByUser()
         {
-           var tasks = await operations.ReturnAllTasks(id_user);
-           return Ok(tasks);
+            try
+            {
+                var id_user = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var tasks = await operations.ReturnAllTasks(id_user!);
+                return Ok(tasks);
+            }
+            catch { return Conflict(); }
         }
 
-
-        [HttpPost] // Создание задачи
-        public async Task<IActionResult> CreateTask(Models.TaskDTO task) // Метод принимает объект от пользователя в формате json, где есть все входные данные
+       
+        [Authorize]
+        [HttpPost] // Создание задачи у определённого юзера
+        public async Task<IActionResult> CreateTask(TaskDTO task) // Метод принимает объект от пользователя в формате json, где есть все входные данные
         {
- 
-                var newTask = await operations.CreateNewTask(task);
+            try
+            {
+                var id_user = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var newTask = await operations.CreateNewTask(task, int.Parse(id_user!));
                 return Ok(newTask);
+            }
+            catch { return Conflict(); }
         }
 
-        [HttpDelete("{id_task}")] // Удаление задачи
-        public async Task<IActionResult> CreateTask(int id_task) // Метод принимает объект от пользователя в формате json, где есть все входные данные
-        {
 
-            var delTask = await operations.DeleteTask(id_task);
-            return Ok(delTask);
-        }
+        
+       [Authorize]
+       [HttpDelete("{id_task}")] // Удаление задачи
+       public async Task<IActionResult> CreateTask(int id_task) // Метод принимает объект от пользователя в формате json, где есть все входные данные
+       {
+            var id_user = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var delTask = await operations.DeleteTask(id_task, id_user!);
+           return Ok(delTask);
+       }
 
-        [HttpPut("{id_task}")] // Изменение задачи
-        public async Task<IActionResult> UpdateTask(int id_task, TaskDTO task) // Метод принимает объект от пользователя в формате json, где есть все входные данные
-        {
+        /*
+       [Authorize]
+       [HttpPut("{id_task}")] // Изменение задачи
+       public async Task<IActionResult> UpdateTask(int id_task, TaskDTO task) // Метод принимает объект от пользователя в формате json, где есть все входные данные
+       {
 
-            var updateTask = await operations.UpdateTaks(id_task, task);
-            return Ok(updateTask);
-        }
+           var updateTask = await operations.UpdateTaks(id_task, task);
+           return Ok(updateTask);
+       }
+
+       */
     }
 }

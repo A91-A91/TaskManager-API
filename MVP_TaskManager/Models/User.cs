@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 
 namespace MVP_TaskManager.Models;
 
@@ -15,5 +16,6 @@ public partial class User
 
     public DateOnly? RegDate { get; set; }
 
+ 
     public virtual ICollection<Task> Tasks { get; set; } = new List<Task>();
 }
