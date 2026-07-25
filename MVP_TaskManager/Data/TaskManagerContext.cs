@@ -25,10 +25,16 @@ public partial class TaskManagerContext : DbContext
    
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=TaskManager;Username=postgres;Password=123456789");
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=TaskManager;Username=postgres;Password=123456789");
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasPostgresEnum<UserRole>("public", "user_role");
         modelBuilder.Entity<StatusRef>(entity =>
         {
             entity.HasKey(e => e.IdStatus).HasName("status_ref_pkey");
@@ -82,6 +88,7 @@ public partial class TaskManagerContext : DbContext
             entity.Property(e => e.Password).HasColumnName("password");
             entity.Property(e => e.RegDate).HasColumnName("reg_date");
             entity.Property(e => e.Username).HasColumnName("username");
+            entity.Property(e => e.Role).HasColumnName("role");
         });
 
         OnModelCreatingPartial(modelBuilder);

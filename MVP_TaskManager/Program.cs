@@ -6,11 +6,25 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using Npgsql;
+using MVP_TaskManager.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var dataSourceBuilder = new NpgsqlDataSourceBuilder(
+    builder.Configuration.GetConnectionString("DefaultConnection"));
+
+dataSourceBuilder.MapEnum<UserRole>("user_role");
+
+var dataSource = dataSourceBuilder.Build();
+
+builder.Services.AddDbContext<TaskManagerContext>(options =>
+    options.UseNpgsql(dataSource));
+
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -20,7 +34,7 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Введите JWT-токен. Пример: Bearer eyJhbGciOi..."
+        Description = "Введите JWT-токен. Пример: eyJhbGciOi..."
     });
 
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -40,11 +54,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 
-builder.Services.AddDbContext<TaskManagerContext>(options =>
-    options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection")
-    )
-);
+
 builder.Services.AddScoped<Operations_tasks>();
 
 builder.Services.AddAuthentication(options =>
@@ -75,7 +85,7 @@ builder.Services.AddAuthentication(options =>
         OnAuthenticationFailed = context =>
         {
             Console.WriteLine(context.Exception);
-            return Task.CompletedTask;
+            return System.Threading.Tasks.Task.CompletedTask;
         }
     };
 });
