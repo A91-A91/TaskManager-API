@@ -1,6 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using MVP_TaskManager.Data;
@@ -23,29 +24,37 @@ namespace MVP_TaskManager.Classes
             this.configuration = configuration;
         }
 
-        public async Task<User> Registration(RegisterDTO user) //создание нового пользователя (регистрация)
+        /// <summary>
+        /// Метод регистрации нового пользователя
+        /// </summary>
+        /// <param name="user">Объект типа USER</param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        /// 
+        public async Task<bool> Registration( RegisterDTO user) //создание нового пользователя (регистрация)
         {
             var exists = await context.Users
             .AnyAsync(x => x.Login == user.Login);
 
             if (exists)
-                return null;
+                throw new InvalidOperationException
+                    ("Такой логин уже существует!");
 
             var newUser = new User
             {
                 Username = user.Username,
                 Login = user.Login,
                 Password = user.Password,
-                RegDate = DateOnly.FromDateTime(DateTime.UtcNow),
             };
+
+            newUser.RegDate = DateOnly.FromDateTime(DateTime.UtcNow);
+            newUser.Role = UserRole.User; // ИСПРАВИТЬ ЭТО
 
             context.Users.Add(newUser);
             await context.SaveChangesAsync();
-            return newUser;
+            return true;
         }
 
-
-  
 
         /// <summary>
         /// Логирование пользователя

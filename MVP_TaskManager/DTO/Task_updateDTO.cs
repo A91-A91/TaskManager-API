@@ -2,15 +2,13 @@
 
 namespace MVP_TaskManager.DTO
 {
-    public class TaskDTO
+    public class Task_updateDTO
     {
-        [Required]
-        [MinLength(5)]
+
         public string? Name { get; set; }
 
         public string? Description { get; set; }
 
         public int? IdStatus { get; set; }
-
     }
 }

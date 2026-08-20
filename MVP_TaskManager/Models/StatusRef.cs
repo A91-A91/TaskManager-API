@@ -11,3 +11,10 @@ public partial class StatusRef
 
     public virtual ICollection<Task> Tasks { get; set; } = new List<Task>();
 }
+
+public enum Task_Status
+{
+    New = 1,
+    InProgress = 2,
+    Done = 3
+}

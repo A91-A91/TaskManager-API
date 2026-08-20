@@ -15,6 +15,6 @@ public partial class User
     public string? Password { get; set; }
 
     public DateOnly? RegDate { get; set; }
-    public string Role { get; set; } = null!;
+    public UserRole Role { get; set; } 
     public virtual ICollection<Task> Tasks { get; set; } = new List<Task>();
 }

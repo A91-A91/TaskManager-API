@@ -20,7 +20,7 @@ namespace MVP_TaskManager.Controllers
 
         [AllowAnonymous]
         [HttpPost] // Регистрация
-        public async Task<IActionResult> Register(RegisterDTO dto) // Метод принимает объект от пользователя в формате json, где есть все входные данные
+        public async Task<IActionResult> Register([FromQuery] RegisterDTO dto) // Метод принимает объект от пользователя в формате json, где есть все входные данные
         {
             var newUser = await operations.Registration(dto);
 
@@ -33,7 +33,7 @@ namespace MVP_TaskManager.Controllers
         [AllowAnonymous]
         [HttpPost("login")]
         public async Task<ActionResult<AuthResponseDTO>> Login(
-        LoginDTO dto)
+        [FromQuery] LoginDTO dto)
         {
             var result = await operations.Login(dto);
 

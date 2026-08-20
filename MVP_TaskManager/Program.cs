@@ -8,11 +8,13 @@ using System.Text;
 using Microsoft.OpenApi.Models;
 using Npgsql;
 using MVP_TaskManager.Models;
+using static MVP_TaskManager.Exeptions.ExceptionsMiddleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var dataSourceBuilder = new NpgsqlDataSourceBuilder(
-    builder.Configuration.GetConnectionString("DefaultConnection"));
+var dataSourceBuilder =
+    new NpgsqlDataSourceBuilder(
+        builder.Configuration.GetConnectionString("DefaultConnection"));
 
 dataSourceBuilder.MapEnum<UserRole>("user_role");
 
@@ -20,7 +22,6 @@ var dataSource = dataSourceBuilder.Build();
 
 builder.Services.AddDbContext<TaskManagerContext>(options =>
     options.UseNpgsql(dataSource));
-
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -93,9 +94,10 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddScoped<Operations_authorization>();
 builder.Services.AddScoped<Operations_users>();
 var app = builder.Build();
+app.UseExceptionHandler();
+
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.UseSwagger();
 app.UseSwaggerUI();
 app.MapControllers();
