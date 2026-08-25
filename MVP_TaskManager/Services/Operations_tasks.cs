@@ -68,7 +68,7 @@ namespace MVP_TaskManager.Classes
             };
 
             newTask = await CheckExistInfo(task, newTask);
-           
+            
             newTask.DateCreate = DateOnly.FromDateTime(DateTime.UtcNow); 
             newTask.IdUser = id_user; 
 
@@ -90,6 +90,9 @@ namespace MVP_TaskManager.Classes
 
             if (string.IsNullOrWhiteSpace(task.Description))
             { newTask.Description = "Нет описания"; }
+
+            if (string.IsNullOrWhiteSpace(task.Name))
+            { newTask.Description = "Нет названия!"; }
 
             return newTask;
         }

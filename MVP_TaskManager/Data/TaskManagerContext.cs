@@ -8,9 +8,6 @@ namespace MVP_TaskManager.Data;
 
 public partial class TaskManagerContext : DbContext
 {
-    public TaskManagerContext()
-    {
-    }
 
     public TaskManagerContext(DbContextOptions<TaskManagerContext> options)
         : base(options)
@@ -23,18 +20,12 @@ public partial class TaskManagerContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
    
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        if (!optionsBuilder.IsConfigured)
-        {
-            optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=TaskManager;Username=postgres;Password=123456789");
-        }
-    }
-
+   
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.HasPostgresEnum<UserRole>("public", "user_role");
+        modelBuilder.HasPostgresEnum<UserRole>();
+        base.OnModelCreating(modelBuilder);
+  
         modelBuilder.Entity<StatusRef>(entity =>
         {
             entity.HasKey(e => e.IdStatus).HasName("status_ref_pkey");
@@ -52,11 +43,6 @@ public partial class TaskManagerContext : DbContext
             entity.HasKey(e => e.IdTask).HasName("tasks_pkey");
 
             entity.ToTable("tasks");
-
-            //entity.Property(e => e.IdTask)
-            //    .ValueGeneratedNever()            всегда удалять, если есть автоинкремент в базе
-            //    .HasColumnName("id_task");
-
 
             entity.Property(e => e.IdTask).ValueGeneratedOnAdd().HasColumnName("id_task");
             entity.Property(e => e.DateCreate).HasColumnName("date_create");
@@ -80,15 +66,25 @@ public partial class TaskManagerContext : DbContext
 
             entity.ToTable("users");
 
-            //  entity.Property(e => e.Id)
-            //      .ValueGeneratedNever()
-            //      .HasColumnName("id");
-            entity.Property(e => e.Id).ValueGeneratedOnAdd().HasColumnName("id");
-            entity.Property(e => e.Login).HasColumnName("login");
-            entity.Property(e => e.Password).HasColumnName("password");
-            entity.Property(e => e.RegDate).HasColumnName("reg_date");
-            entity.Property(e => e.Username).HasColumnName("username");
-            entity.Property(e => e.Role).HasColumnName("role");
+            entity.Property(e => e.Id)
+                .ValueGeneratedOnAdd()
+                .HasColumnName("id");
+
+            entity.Property(e => e.Login)
+                .HasColumnName("login");
+
+            entity.Property(e => e.Password)
+                .HasColumnName("password");
+
+            entity.Property(e => e.RegDate)
+                .HasColumnName("reg_date");
+
+            entity.Property(e => e.Username)
+                .HasColumnName("username");
+            
+            entity.Property(e => e.Role)
+                .HasColumnName("role")
+                .HasConversion<int>();
         });
 
         OnModelCreatingPartial(modelBuilder);

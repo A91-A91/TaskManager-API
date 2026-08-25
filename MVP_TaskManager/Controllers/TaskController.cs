@@ -40,14 +40,12 @@ namespace MVP_TaskManager.Controllers
 
         [Authorize]
         [HttpPost] // Создание задачи у определённого юзера
-        public async Task<IActionResult> CreateTask([FromQuery] TaskDTO task) // Метод принимает объект от пользователя в формате json, где есть все входные данные
+        public async Task<IActionResult> CreateTask([FromBody] TaskDTO task) // Метод принимает объект от пользователя в формате json, где есть все входные данные
         {
             var id_user = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var newTask = await operations.CreateNewTask(task, int.Parse(id_user!));
             return Ok(newTask);
         }
-
-
 
         [Authorize]
         [HttpDelete] // Удаление задачи
@@ -61,58 +59,13 @@ namespace MVP_TaskManager.Controllers
         [HttpPatch]
         public async Task<bool> UpdateTask([FromQuery] int id_task, [FromQuery] Task_updateDTO task)
         {
-            var isAdmin = User.IsInRole("Admin");
+            var isAdmin = User.IsInRole(UserRole.Admin.ToString());
             var id_user = int.Parse(User.FindFirstValue(
                 ClaimTypes.NameIdentifier)!);
             var updateTask = await operations.UpdateTask(id_task, task,id_user,isAdmin);
             await context.SaveChangesAsync();
             return true;
         }
-
-        /*
-        [Authorize]
-        [HttpGet("filter")]
-        public async Task<IActionResult> FilterResults([FromQuery] TaskFilterDTO filter)
-        {
-            try
-            {
-                var results = await operations.FiltersTask(filter);
-                if (!results.Any())
-                {
-                    return NotFound("Нет подходящих под условия данных!");
-                }
-                return Ok(results);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new
-                {
-                    error = ex.Message
-                });
-            }
-        }
-
-        [Authorize]
-        [HttpGet("Sort")]
-        public async Task<IActionResult> SortTasks([FromQuery] TaskSortDTO filter)
-        {
-            try
-            {
-                var results = await operations.SortTask(filter);
-                if (!results.Any())
-                {
-                    return NotFound("Нет подходящих под условия данных!");
-                }
-                return Ok(results);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new
-                {
-                    error = ex.Message
-                });
-            }
-        }*/
 
         [Authorize]
         [HttpGet("Status")]

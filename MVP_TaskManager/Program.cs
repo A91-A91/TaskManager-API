@@ -16,8 +16,6 @@ var dataSourceBuilder =
     new NpgsqlDataSourceBuilder(
         builder.Configuration.GetConnectionString("DefaultConnection"));
 
-dataSourceBuilder.MapEnum<UserRole>("user_role");
-
 var dataSource = dataSourceBuilder.Build();
 
 builder.Services.AddDbContext<TaskManagerContext>(options =>
@@ -94,6 +92,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddScoped<Operations_authorization>();
 builder.Services.AddScoped<Operations_users>();
 var app = builder.Build();
+
 app.UseExceptionHandler();
 
 app.UseAuthentication();
@@ -103,3 +102,5 @@ app.UseSwaggerUI();
 app.MapControllers();
 
 app.Run();
+
+public partial class Program { }

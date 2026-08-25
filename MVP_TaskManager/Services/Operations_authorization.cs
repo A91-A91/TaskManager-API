@@ -48,7 +48,7 @@ namespace MVP_TaskManager.Classes
             };
 
             newUser.RegDate = DateOnly.FromDateTime(DateTime.UtcNow);
-            newUser.Role = UserRole.User; // ИСПРАВИТЬ ЭТО
+            newUser.Role = UserRole.User; 
 
             context.Users.Add(newUser);
             await context.SaveChangesAsync();
@@ -109,5 +109,6 @@ namespace MVP_TaskManager.Classes
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+       
     }
 }

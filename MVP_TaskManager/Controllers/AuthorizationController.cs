@@ -8,32 +8,32 @@ using MVP_TaskManager.DTO;
 namespace MVP_TaskManager.Controllers
 {
     [ApiController]
-    [Route("api/Auth")]
-    public class AutController : ControllerBase
+    [Route("api/Authorization")]
+    public class AuthorizationController : ControllerBase
     {
         private readonly Operations_authorization operations;
 
-        public AutController (Operations_authorization _operations)
+        public AuthorizationController (Operations_authorization _operations)
         {
             operations = _operations;    
         }
 
         [AllowAnonymous]
         [HttpPost] // Регистрация
-        public async Task<IActionResult> Register([FromQuery] RegisterDTO dto) // Метод принимает объект от пользователя в формате json, где есть все входные данные
+        public async Task<IActionResult> Register([FromBody] RegisterDTO dto) // Метод принимает объект от пользователя в формате json, где есть все входные данные
         {
-            var newUser = await operations.Registration(dto);
+            var result = await operations.Registration(dto);
 
-            if (newUser == null) {
+            if (result == false) {
                 return BadRequest("Пользователь с таким логином уже существует!");
             }
-            return Ok(newUser);
+            return Ok(result);
         }
 
         [AllowAnonymous]
         [HttpPost("login")]
         public async Task<ActionResult<AuthResponseDTO>> Login(
-        [FromQuery] LoginDTO dto)
+        [FromBody] LoginDTO dto)
         {
             var result = await operations.Login(dto);
 

@@ -6,6 +6,9 @@ using AsyncTask = System.Threading.Tasks;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using System.Diagnostics.Contracts;
 
 namespace MVP_TaskManager.Classes
 {
@@ -77,9 +80,27 @@ namespace MVP_TaskManager.Classes
             return await context.Users.AnyAsync(u => u.Login == login);
         }
 
-        public async Task<List<User>> AllUser()
+        public async Task<List<User>> AllUser(int page, int pageSize)
+        {   
+            var query = context.Users.AsQueryable();
+
+            if (!CheckValue(page,pageSize))
+            {
+                throw new InvalidOperationException
+                    ("Невозможные знания для page или pageSize");
+            }
+
+            query = query
+               .Skip((page - 1) * pageSize)
+               .Take(pageSize);
+            return await query.ToListAsync();
+        }
+
+        private bool CheckValue(int page, int pageSize)
         {
-            return await context.Users.ToListAsync();
+            if (page <= 0 || pageSize <= 0) { return false; }
+            else
+                return true; 
         }
 
         public async Task<List<User>> UsersForID(int id_user)
@@ -95,10 +116,6 @@ namespace MVP_TaskManager.Classes
                 .FirstOrDefaultAsync(u => u.Id == id_user);
 
             if (userForDel == null) return false;
-
-            Console.WriteLine($"id_user = {id_user}");
-            Console.WriteLine($"id_User_Deleting = {id_User_Deleting}");
-            Console.WriteLine($"is_Admin = {is_Admin}");
 
             if (CheckRoots(id_user, is_Admin, id_User_Deleting) == false)
             {

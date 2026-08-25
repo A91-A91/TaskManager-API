@@ -21,9 +21,9 @@ public class UsersController : ControllerBase
 
     [Authorize(Roles = "Admin")]
     [HttpGet]
-    public async Task<ActionResult<List<User>>> GetAll()
+    public async Task<ActionResult<List<User>>> GetAll([FromQuery] int page = 1, [FromQuery] int page_size = 5)
     {
-        var all = await operations.AllUser();
+        var all = await operations.AllUser(page, page_size);
         return Ok(all);
     }
 
