@@ -46,14 +46,23 @@ public class UsersController : ControllerBase
         return Ok(newUser);
     }
 
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [HttpDelete] // Удаление пользователей
     public async Task<ActionResult<User>> DeleteUser( 
     int id_user)
     {
         var isAdmin = User.IsInRole("Admin");
         var id_User_Deleting = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var delUser = await operations.DeleteUser(id_user, isAdmin,id_User_Deleting);
+        var delUser = await operations.DeleteUser(id_user,id_User_Deleting, isAdmin);
+        return Ok(delUser);
+    }
+
+    [Authorize]
+    [HttpDelete("me")] // Удаление своего аккаунта пользователем
+    public async Task<ActionResult<User>> DeleteMe()
+    {
+        var id_User_Deleting = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var delUser = await operations.DeleteUser(id_User_Deleting, id_User_Deleting);
         return Ok(delUser);
     }
 
