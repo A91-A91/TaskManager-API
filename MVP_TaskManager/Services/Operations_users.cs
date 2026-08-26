@@ -19,7 +19,12 @@ namespace MVP_TaskManager.Classes
         {
             context = _context;
         }
-
+        /// <summary>
+        /// 
+        /// </summary> Создание нового пользователя
+        /// <param name="user"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public async Task<User> CreateNewUser(User_CreateDTO user)
         {
             
@@ -48,7 +53,15 @@ namespace MVP_TaskManager.Classes
         }
 
 
-
+        /// <summary>
+        /// Обновление пользователя
+        /// </summary>
+        /// <param name="id_user"></param>
+        /// <param name="user"></param>
+        /// <param name="id_User_Updating"></param>
+        /// <param name="is_Admin"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public async Task<bool> UpdateUser(int id_user, 
             [FromQuery] User_UpdateDTO user, 
             int id_User_Updating, 
@@ -75,11 +88,23 @@ namespace MVP_TaskManager.Classes
             return true;
         }
 
+        /// <summary>
+        /// Проверка уникальности логина
+        /// </summary>
+        /// <param name="login"></param>
+        /// <returns></returns>
         private async Task<bool> CheckLogin(string login)
         {
             return await context.Users.AnyAsync(u => u.Login == login);
         }
 
+        /// <summary>
+        /// Вывод всех пользователей
+        /// </summary>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public async Task<List<User>> AllUser(int page, int pageSize)
         {   
             var query = context.Users.AsQueryable();
@@ -96,20 +121,39 @@ namespace MVP_TaskManager.Classes
             return await query.ToListAsync();
         }
 
+        /// <summary>
+        /// Проверка корректности введенных
+        /// значений для страницы и размера страницы
+        /// </summary>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
         private bool CheckValue(int page, int pageSize)
         {
             if (page <= 0 || pageSize <= 0) { return false; }
             else
                 return true; 
         }
-
+        /// <summary>
+        /// Вывод юзера по определенному ID
+        /// </summary>
+        /// <param name="id_user"></param>
+        /// <returns></returns>
         public async Task<List<User>> UsersForID(int id_user)
         {
             var userByID = await context.Users.Where(userID => userID.Id == id_user).ToListAsync();
             return userByID;
         }
 
-        public async Task<bool> DeleteUser(int id_user, bool is_Admin, int id_User_Deleting )
+        /// <summary>
+        /// Удаление определенного юзера из БД
+        /// </summary>
+        /// <param name="id_user"></param>
+        /// <param name="id_User_Deleting"></param>
+        /// <param name="is_Admin"></param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
+        public async Task<bool> DeleteUser(int id_user, int id_User_Deleting, bool is_Admin = false)
         {
             
             var userForDel = await context.Users
@@ -129,6 +173,15 @@ namespace MVP_TaskManager.Classes
             return true;
         }
 
+        /// <summary>
+        /// Проверка прав пользователя
+        /// для работы с методами
+        /// удаления и обновления пользователей
+        /// </summary>
+        /// <param name="id_user"></param>
+        /// <param name="is_Admin"></param>
+        /// <param name="id_User_Required"></param>
+        /// <returns></returns>
         public bool CheckRoots(int? id_user, bool is_Admin, int id_User_Required)
         {
             if (id_user == id_User_Required || is_Admin)
@@ -137,7 +190,13 @@ namespace MVP_TaskManager.Classes
             }
             else return false;
         }
-
+        /// <summary>
+        /// Вспомогательный метод для
+        /// удаления всех задач 
+        /// юзера при удалении его из бд
+        /// </summary>
+        /// <param name="id_user"></param>
+        /// <returns></returns>
         private async Task<bool> DeleteAllTasksByUser (int id_user)
         {
             var tasks = await context.Tasks
