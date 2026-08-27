@@ -41,7 +41,7 @@ namespace MVP_TaskManager.Classes
                 var query = context.Tasks.AsQueryable(); //вывод записей из Tasks
 
                 query = GetTaskOfUser(query, id_user);
-                query = FilterByNameTask(query, filterTask); //добавляем сам фильтр
+                query = ResearchByNameTask(query, filterTask); //добавляем сам фильтр
                 query = FilterByDate(query, filterTask);
                 query = FilterByStatus(query, filterTask);
                 query = SortByDate(sort, query);
