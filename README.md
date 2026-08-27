@@ -1,3 +1,6 @@
+<img width="1335" height="853" alt="image" src="https://github.com/user-attachments/assets/2ee5f067-d34d-4305-b962-7a62c9d799f0" />
+
+
 # Task Manager API
 
 A RESTful API for managing users and tasks.
@@ -32,9 +35,9 @@ The project was built as a backend practice project using ASP.NET Core and Postg
 The application is containerized using Docker.
 
 Build the Docker image
-'docker build -t my-project '
+' docker build -t my-project '
 Run the container
-'docker run --rm -p 8080:8080 my-project'
+' docker run --rm -p 8080:8080 my-project '
 
 After starting the container, the API will be available at:
 
@@ -42,7 +45,7 @@ http://localhost:8080
 
 ## Swagger UI:
 
-'http://localhost:8080/swagger'
+''' http://localhost:8080/swagger '''
 
 Note: The application requires a PostgreSQL database. The connection string should be configured according to your environment.
 
