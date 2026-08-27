@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MVP_TaskManager.Classes;
@@ -30,24 +29,11 @@ namespace MVP_TaskManager.Controllers
         [HttpGet] //поиск и вывод задач у определенного пользователя
         public async Task<ActionResult<List<Models.Task>>> GetAllTaskByUser(
           [FromQuery] TaskFilterDTO filter,
-          [FromQuery] TaskSortDTO sort, int page = 1, int pageSize = 2)
+          [FromQuery] TaskSortDTO sort, int page = 1)
         {
             var id_user = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var tasks = await operations.ReturnAllTasks(int.Parse(id_user!), filter, sort, page, pageSize);
-            return Ok(tasks);
-        }
-
-        [Authorize(Roles = "Admin")]
-        [HttpGet("id_user")] 
-        //поиск и вывод задач у
-        //определенного пользователя за админа
-        public async Task<ActionResult<List<Models.Task>>> GetAllTaskByUser_Admin(
-          [Required] int id_user,
-          [FromQuery] TaskFilterDTO filter,
-          [FromQuery] TaskSortDTO sort, int page = 1, int pageSize = 2)
-        {   
-            var tasks = await operations.ReturnAllTasks(id_user, filter, sort, page, pageSize);
+            var tasks = await operations.ReturnAllTasks(int.Parse(id_user!), filter, sort, page);
             return Ok(tasks);
         }
 
@@ -65,14 +51,12 @@ namespace MVP_TaskManager.Controllers
         [HttpDelete] // Удаление задачи
         public async Task<IActionResult> DeleteTask([FromQuery] int id_task) // Метод принимает объект от пользователя в формате json, где есть все входные данные
         {
-            var id_user = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var isAdmin = User.IsInRole(UserRole.Admin.ToString());
-            var delTask = await operations.DeleteTask(id_task, int.Parse(id_user!), isAdmin);
+            var delTask = await operations.DeleteTask(id_task);
             return Ok(delTask);
         }
 
         [Authorize]
-        [HttpPatch] // Изменение данных пользователя
+        [HttpPatch]
         public async Task<bool> UpdateTask([FromQuery] int id_task, [FromQuery] Task_updateDTO task)
         {
             var isAdmin = User.IsInRole(UserRole.Admin.ToString());
@@ -84,7 +68,7 @@ namespace MVP_TaskManager.Controllers
         }
 
         [Authorize]
-        [HttpGet("Status")] // Получение данных о статусах
+        [HttpGet("Status")]
         public async Task<IActionResult> GetStatus()
         {
             var statuses = await operations.GetAllStatus();

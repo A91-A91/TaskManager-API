@@ -31,7 +31,7 @@ namespace MVP_TaskManager.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("login")] //Логирование
+        [HttpPost("login")]
         public async Task<ActionResult<AuthResponseDTO>> Login(
         [FromBody] LoginDTO dto)
         {
