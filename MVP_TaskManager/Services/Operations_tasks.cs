@@ -31,13 +31,13 @@ namespace MVP_TaskManager.Classes
         /// </summary>
         /// <param name="id_user"></param>
         /// <returns></returns>
-        public async Task<List<Models.Task>> ReturnAllTasks(int id_user, 
+        public async Task<List<Models.Task>> ReturnAllTasks(int? id_user, 
         TaskFilterDTO filterTask, TaskSortDTO sort,
-        int page)
+        int page, int pageSize = 2)
             {
             try
             {
-                int pageSize = 2;
+              
                 var query = context.Tasks.AsQueryable(); //вывод записей из Tasks
 
                 query = GetTaskOfUser(query, id_user);
@@ -58,6 +58,12 @@ namespace MVP_TaskManager.Classes
             catch { return null; }
         }
 
+        /// <summary>
+        /// Создание новых задач
+        /// </summary>
+        /// <param name="task">Объект задачи</param>
+        /// <param name="id_user">ID пользователя</param>
+        /// <returns></returns>
         public async Task <Models.Task> CreateNewTask(TaskDTO task, int id_user) //!!!!
         {
             var newTask = new Models.Task //создали новую задачу
@@ -77,12 +83,23 @@ namespace MVP_TaskManager.Classes
             return newTask;
         }
 
+
+        /// <summary>
+        /// Проверка на существование статуса
+        /// </summary>
+        /// <param name="idStatus">Номер статуса</param>
+        /// <returns></returns>
         private async Task<bool> CheckExistStatus(int? idStatus)
         {
             return await context.StatusRefs
                 .AnyAsync(s => s.IdStatus == idStatus);
         }
-
+        /// <summary>
+        /// Проверка на пустоту введеных данных
+        /// </summary>
+        /// <param name="task"></param>
+        /// <param name="newTask"></param>
+        /// <returns></returns>
         private async Task<Models.Task> CheckExistInfo(TaskDTO task, Models.Task newTask)
         {
             if (!await CheckExistStatus(task.IdStatus))
@@ -97,13 +114,25 @@ namespace MVP_TaskManager.Classes
             return newTask;
         }
 
+        /// <summary>
+        /// Метод вывода всех статусов из БД
+        /// </summary>
+        /// <returns></returns>
         public async Task<List<StatusRef>> GetAllStatus()
         {
             var statuses = await context.StatusRefs.ToListAsync();
             return statuses;
         }
 
-        public async Task<bool> DeleteTask(int id_task)
+        /// <summary>
+        /// Удаление задачи 
+        /// </summary>
+        /// <param name="id_task"></param>
+        /// <param name="id_user"></param>
+        /// <param name="is_Admin"></param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
+        public async Task<bool> DeleteTask(int id_task, int id_user, bool is_Admin)
         {
 
             var taskForDel = await context.Tasks
@@ -111,11 +140,26 @@ namespace MVP_TaskManager.Classes
             
             if (taskForDel == null) return false;
 
+            if (!operations.CheckRoots(taskForDel.IdUser,
+                is_Admin, id_user))
+            {
+                throw new UnauthorizedAccessException();
+            }
+
             context.Tasks.Remove(taskForDel);
             await context.SaveChangesAsync();
             return true;
         }
 
+        /// <summary>
+        /// Обновление задачи
+        /// </summary>
+        /// <param name="id_task"></param>
+        /// <param name="task"></param>
+        /// <param name="id_User_Required"></param>
+        /// <param name="is_Admin"></param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
         public async Task<bool> UpdateTask(int id_task,
             Task_updateDTO task,
             int id_User_Required,
@@ -151,27 +195,45 @@ namespace MVP_TaskManager.Classes
             return true;
         }
 
-        public async Task<List<Models.Task>> FiltersTask(TaskFilterDTO filterTask) // метод вызова фильтра
+        /// <summary>
+        /// Фильтрация вывода записей
+        /// </summary>
+        /// <param name="filterTask"></param>
+        /// <returns></returns>
+        public async Task<List<Models.Task>> FiltersTask(TaskFilterDTO filterTask)
         {
-            var query = context.Tasks.AsQueryable(); //вывод записей из Tasks
+            var query = context.Tasks.AsQueryable(); 
 
-            query = FilterByNameTask(query,filterTask); //добавляем сам фильтр
+            query = ResearchByNameTask(query,filterTask); 
             query = FilterByDate(query,filterTask);
             query = FilterByStatus(query, filterTask);
 
             return await query.ToListAsync();
         }
 
-        private IQueryable<Models.Task> FilterByNameTask(IQueryable<Models.Task> query, TaskFilterDTO filterTask)
+        /// <summary>
+        /// Поиск по названию задачи
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="filterTask"></param>
+        /// <returns></returns>
+        private IQueryable<Models.Task> ResearchByNameTask(IQueryable<Models.Task> query, TaskFilterDTO filterTask)
         {
             if (!string.IsNullOrWhiteSpace(filterTask.Name))
             {
                 query = query.Where(r =>
-                    r.Name!.Contains(filterTask.Name)); // содержится ли строка внутри другой
+                    r.Name!.Contains(filterTask.Name)); 
             }
             else { Console.WriteLine("Пустая строка для имени!"); }
             return query;
         }
+
+        /// <summary>
+        /// Фильтрация по дате создания
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="filterTask"></param>
+        /// <returns></returns>
 
         private IQueryable<Models.Task> FilterByDate(IQueryable<Models.Task> query, TaskFilterDTO filterTask)
         {
@@ -189,6 +251,12 @@ namespace MVP_TaskManager.Classes
             return query;
         }
 
+        /// <summary>
+        /// Фильтрация по статусу задачи
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="filterTask"></param>
+        /// <returns></returns>
         private IQueryable<Models.Task> FilterByStatus(IQueryable<Models.Task> query, TaskFilterDTO filterTask)
         {
             if (filterTask.IdStatus.HasValue)
@@ -199,6 +267,11 @@ namespace MVP_TaskManager.Classes
             return query;
         }
 
+        /// <summary>
+        /// Общий метод для вызова методов сортировок
+        /// </summary>
+        /// <param name="filter"></param>
+        /// <returns></returns>
         public async Task<List<Models.Task>> SortTask(TaskSortDTO filter)
         {
             var query = context.Tasks.AsQueryable();
@@ -207,6 +280,12 @@ namespace MVP_TaskManager.Classes
             return await query.ToListAsync();
         }
 
+        /// <summary>
+        /// Сортировка по дате создания задачи
+        /// </summary>
+        /// <param name="task"></param>
+        /// <param name="query"></param>
+        /// <returns></returns>
         private IQueryable<Models.Task> SortByDate(TaskSortDTO task, IQueryable<Models.Task> query)
         {
             if (task.SortBy == "date")
@@ -223,7 +302,12 @@ namespace MVP_TaskManager.Classes
             }
             return query;
         }
-
+        /// <summary>
+        /// Сортировка по имена задачи
+        /// </summary>
+        /// <param name="task"></param>
+        /// <param name="query"></param>
+        /// <returns></returns>
         private IQueryable<Models.Task> SortByName(TaskSortDTO task, IQueryable<Models.Task> query)
         {
             if (task.SortBy == "name")
@@ -242,13 +326,19 @@ namespace MVP_TaskManager.Classes
             return query;
         }
 
+        /// <summary>
+        /// Получение задачи определенного юзера (для запроса)
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="id_user"></param>
+        /// <returns></returns>
         private IQueryable<Models.Task> GetTaskOfUser(
         IQueryable<Models.Task> query,
-        int id_user)
+        int? id_user)
         {
             return query.Where(task => task.IdUser == id_user);
         }
-
-
     }
 }
+
+// Не знаю зачем я добавил комменты к методам, но пусть будут
